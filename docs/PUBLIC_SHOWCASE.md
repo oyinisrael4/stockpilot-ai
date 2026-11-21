@@ -1,6 +1,6 @@
 # Phase 8: public showcase and publication guide
 
-Status: public launch approved by the owner on November 21, 2026. Publication is being prepared for `oyinisrael4/stockpilot-ai`; deployment is restricted to the static showcase on Cloudflare Pages Free. No local backend or inference service may be exposed. The public profile links are Israel's authenticated GitHub account and the website advertised by its public `israel-projects` repository.
+Status: public launch approved by the owner on November 21, 2026. Source published at https://github.com/oyinisrael4/stockpilot-ai and its public `main` branch verified. Cloudflare deployment is pending account authentication checks and is restricted to the static showcase on Pages Free. No local backend or inference service may be exposed. The public profile links are Israel's authenticated GitHub account and the website advertised by its public `israel-projects` repository.
 
 ## Two independent builds
 

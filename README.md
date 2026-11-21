@@ -2,7 +2,7 @@
 
 StockPilot AI is a business operations workspace by Israel Oyinlola. It covers accounts, catalog management, stock tracking, purchases, checkout, customer balances, returns, expenses and financial reporting.
 
-[Developer GitHub](https://github.com/oyinisrael4) · [Developer portfolio](https://israel-projects-one.vercel.app) · [Public showcase publishing guide](docs/PUBLIC_SHOWCASE.md)
+[Source code](https://github.com/oyinisrael4/stockpilot-ai) · [Developer GitHub](https://github.com/oyinisrael4) · [Developer portfolio](https://israel-projects-one.vercel.app) · [Public showcase publishing guide](docs/PUBLIC_SHOWCASE.md)
 
 ![StockPilot V2 overview, captured in the fictional Juniper workspace](docs/screenshots/phase61-overview-1440.png)
 
@@ -17,7 +17,7 @@ npm.cmd run build:showcase
 npm.cmd run preview:showcase
 ```
 
-Open http://127.0.0.1:5198/ and choose **Explore interactive demo**. Deployable output is **frontend/dist-showcase only**. Nothing has been published yet. See [publication and zero-cost hosting instructions](docs/PUBLIC_SHOWCASE.md); Cloudflare Pages Free is the recommended static target. Never upload the workspace folder, root `.env`, `.local`, model weights or backups.
+Open http://127.0.0.1:5198/ and choose **Explore interactive demo**. Deployable output is **frontend/dist-showcase only**. The source repository is public; the public demonstration URL will be added after Cloudflare deployment and verification. See [publication and zero-cost hosting instructions](docs/PUBLIC_SHOWCASE.md); Cloudflare Pages Free is the approved static target. Never upload the workspace folder, root `.env`, `.local`, model weights or backups.
 
 ![Public showcase desktop](docs/screenshots/phase8-showcase-1440.png)
 
