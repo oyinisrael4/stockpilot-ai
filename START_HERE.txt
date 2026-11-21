@@ -1,0 +1,11 @@
+STOCKPILOT AI — GOOGLE ANTIGRAVITY STARTER KIT
+
+1. Create a project/workspace named stockpilot-ai.
+2. Copy the full design-references folder into that project.
+3. Open ANTIGRAVITY_MASTER_PROMPT.md and paste its contents into Antigravity (use /plan if supported).
+4. Ask Antigravity to inspect all five screenshots first and generate an implementation plan.
+5. Review the plan and let it implement the phases; ask for tests and browser screenshots after each phase.
+
+DO NOT treat reference images as screenshots of working code or trust the fake numbers
+in them. Real calculations, working CRUD, manual sales, AI chat & voice and security
+are essential. Real provider keys may be needed for production AI and transcription.

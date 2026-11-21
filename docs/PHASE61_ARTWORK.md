@@ -1,0 +1,8 @@
+# Phase 6.1 artwork
+Generated using the built-in image generation tool, then cropped and encoded as WebP using local browser canvas.
+
+Hero prompt: Landscape high-end photoreal 3D isometric Nigerian retail micro-store diorama on cream #f4efed studio backdrop, lavender ribbed checkout counter with dark register and scanner, wood shelves stocked with realistic drinks and snack packets, mint plant, shipping cartons, small sculptural teal glass ascending bars on right symbolizing intelligence. Single coherent architectural scene, soft daylight and grounded shadows, detailed materials, no text, no numbers, no UI overlays. Full object with breathing room.
+
+Catalog prompt: Create a contact sheet of exactly six original photoreal grocery product catalogue photographs in a precise 3 column by 2 row grid of equal sized cells. Each cell has identical light warm gray studio backdrop, whole product centered and ample padding, no frames, no gaps or borders between cells. Top row left to right: blue capped clear spring water PET bottle, green capped clear sparkling water PET bottle, vivid hibiscus red soda can. Bottom row left to right: yellow plantain crisps packet, cream and green ginger tea carton, maroon roasted cashew standup pouch. Distinct color-coded fictional Juniper labels, no pricing or numbers. Premium soft daylight, realistic materials. Grid alignment at exact thirds and half so every cell can be cropped individually.
+
+Files live in frontend/public/portfolio. Product artwork is illustrative packaging. Names, prices and stock values displayed alongside it come from catalog records. Product interface previews are captures from the isolated demo database.
