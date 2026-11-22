@@ -8,7 +8,13 @@ StockPilot AI is a business operations workspace by Israel Oyinlola. It covers a
 
 ## Full online application — deployment in preparation
 
-The primary deployment is now the complete application on **Render Free**, with **Neon Free PostgreSQL** and **Groq Free** chat/speech. The static showcase remains an additional resource. See the [full-stack deployment guide](docs/FREE_FULLSTACK_DEPLOYMENT.md) for account setup, private credentials, quotas, security, verification and limitations. No verified Render URL is available yet.
+**[Open the functioning application](https://stockpilot-ai-p89q.onrender.com)** → Sign in → **Enter fictional demo**.
+
+The verified deployment runs the complete application on **Render Free**, with **Neon Free PostgreSQL** and **Groq Free** chat/speech. The [static showcase](https://stockpilot-ai-p89q.onrender.com/showcase/) remains an additional resource. See the [full-stack deployment guide](docs/FREE_FULLSTACK_DEPLOYMENT.md) for account setup, security, quotas and limitations.
+
+Public-hosted verification on November 22, 2026 passed both end-to-end journeys: real cloud conversations and follow-ups, explicit/duplicate sale confirmation, database persistence, actual cloud transcription, microphone recording and editable transcription, desktop/mobile layout, HTTPS, secure cookies and security headers. [Hosted desktop](docs/screenshots/hosted-overview-1440.png) · [Hosted mobile](docs/screenshots/hosted-overview-390.png).
+
+Visitors share fictional records and a demo identity. Do not enter private information. Free services may sleep or exhaust quotas; email recovery is disabled for this demo. No local computer or offline inference endpoint is exposed.
 
 Groq uses strict structured intents with `openai/gpt-oss-20b` and speech transcription with `whisper-large-v3-turbo`. Financial calculations and confirmations stay in Django. Local Ollama and offline Whisper remain supported. Free services may sleep, throttle or suspend; no paid fallback or automatic upgrade is configured.
 

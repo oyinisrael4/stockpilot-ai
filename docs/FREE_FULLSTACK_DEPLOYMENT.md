@@ -1,5 +1,15 @@
 # Full application deployment: Render Free + Neon Free + Groq Free
 
+## Verified public launch — November 22, 2026
+
+Application: https://stockpilot-ai-p89q.onrender.com — choose Sign in, then Enter fictional demo. Additional static resource: https://stockpilot-ai-p89q.onrender.com/showcase/.
+
+The running service was verified as Free. The existing unrelated service was unchanged; both share the workspace's free allowance. No domain, disk, Render database, paid model, billing upgrade or local tunnel was created.
+
+Both public-hosted Edge tests passed in 1.7 minutes: real Groq sale interpretation, explicit/duplicate confirmation, Neon persistence, report follow-ups, actual Groq Whisper, microphone recording through a virtual test device, editable transcription, 390/1440 px captures, HTTPS, HTTP redirect, HSTS, Secure session cookie, API no-store and restrictive showcase policies. TLS verification remained enabled throughout. The container required an explicit system CA bundle for Neon; the local Node client used Windows trusted certificates.
+
+Evidence: ignored `.local/hosted-live-tests.log`, `.local/cloud-live-verification.json`, and public `docs/screenshots/hosted-overview-{1440,390}.png`. Fictional verification transactions and audit trails were retained. These tests do not certify unrestricted availability or real-business readiness. The status narrative below describes the preparation stage; public-host verification is now completed as recorded here.
+
 Status: cloud-provider integration and deployment configuration implemented. Local verification passed 70 backend tests (two opt-in local-model tests skipped), all six browser journeys against Django-served production React assets, both frontend builds, API schema validation and secret scanning. Real Groq/Neon verification passed sale interpretation, explicit and duplicate confirmations, persisted stock, multi-turn reports, actual cloud Whisper transcription and cancellation without writes, using production settings through an in-process HTTPS client. Fictional test transactions and audit trails were retained. Public Render ingress/browser checks remain separate and pending deployment. The static portfolio remains an additional resource at `/showcase/`.
 
 ## Architecture
