@@ -31,17 +31,37 @@ function errorMessage(value: unknown): string {
 }
 
 export async function api<T>(path: string, method = 'GET', body?: unknown, signal?: AbortSignal): Promise<T> {
+  const controller = new AbortController()
+  const cancel = () => controller.abort(signal?.reason)
+  if (signal?.aborted) cancel()
+  signal?.addEventListener('abort', cancel, { once: true })
+  let timedOut = false
+  const timer = window.setTimeout(() => { timedOut = true; controller.abort() },
+    path.startsWith('auth/') ? 30_000 : path.includes('assistant/') ? 150_000 : 45_000)
+  try {
   const prefix = (import.meta.env.VITE_STOCKPILOT_CSRF_COOKIE || 'csrftoken') + '='
   const token = document.cookie.split('; ').find(cookie => cookie.startsWith(prefix))?.slice(prefix.length) ?? ''
   const response = await fetch(`/api/v1/${path}`, {
-    method, signal, credentials: 'same-origin',
+    method, signal: controller.signal, credentials: 'same-origin',
     headers: { Accept: 'application/json', 'Content-Type': body instanceof Blob ? body.type : 'application/json', 'X-CSRFToken': decodeURIComponent(token) },
     body: body === undefined || body instanceof Blob ? body : JSON.stringify(body),
   })
   if (response.status === 204) return undefined as T
+  if (response.ok && !response.headers.get('Content-Type')?.includes('application/json')) {
+    throw new Error('The server is waking up or temporarily unavailable. Wait a minute, refresh this page and try again.')
+  }
   const data = response.headers.get('Content-Type')?.includes('application/json') ? await response.json() : null
   if (!response.ok) throw new Error(data ? errorMessage(data) : `Request failed (${response.status}). Please refresh and try again.`)
   return data as T
+  } catch (error) {
+    if (timedOut) throw new Error(path.startsWith('auth/')
+      ? 'Sign-in took too long. The free server may be waking up. Wait a minute, refresh this page and try again.'
+      : 'The server took too long to respond. Check transaction history before retrying a sale or payment; it may have completed.')
+    throw error
+  } finally {
+    window.clearTimeout(timer)
+    signal?.removeEventListener('abort', cancel)
+  }
 }
 
 export function useData<T>(path: string) {
