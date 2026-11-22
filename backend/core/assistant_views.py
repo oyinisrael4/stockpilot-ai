@@ -88,7 +88,8 @@ class AssistantStatus(TenantMixin, APIView):
     @extend_schema(responses={200: dict})
     def get(self, request, business_id):
         enabled = active_provider()
-        return Response({"provider_enabled": enabled, "provider": settings.ASSISTANT_PROVIDER if enabled else None})
+        return Response({"provider_enabled": enabled, "provider": settings.ASSISTANT_PROVIDER if enabled else None,
+                         "voice_provider": settings.VOICE_PROVIDER})
 
 
 class Conversations(TenantMixin, mixins.ListModelMixin, mixins.CreateModelMixin,

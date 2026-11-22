@@ -45,8 +45,8 @@ function release(recording: Recording) {
   recorder.stream.getTracks().forEach(track => track.stop())
 }
 
-export function VoiceDialog({ businessId, close, useTranscript }: {
-  businessId: number; close: () => void; useTranscript: (text: string) => boolean
+export function VoiceDialog({ businessId, provider, close, useTranscript }: {
+  businessId: number; provider?: 'offline' | 'groq'; close: () => void; useTranscript: (text: string) => boolean
 }) {
   const mounted = useRef(false)
   const recording = useRef<Recording | null>(null)
@@ -178,7 +178,7 @@ export function VoiceDialog({ businessId, close, useTranscript }: {
 
   return <Dialog title="Voice input" close={close}>
     <div className="voice-dialog">
-      <p className="muted">Record up to 45 seconds in English. Audio stays in this tab until you select Transcribe. StockPilot processes it on its server without a cloud speech service.</p>
+      <p className="muted">Record up to 45 seconds in English. Audio stays in this tab until you select Transcribe. {provider === 'groq' ? 'Transcribe sends this clip through StockPilot to Groq Cloud speech recognition. Avoid private information.' : provider === 'offline' ? 'StockPilot processes it on its server using offline Whisper without a cloud speech service.' : 'Check Connection details for the server speech provider before submitting sensitive audio.'}</p>
       {unavailable ? <p className="notice error" role="alert">{unavailable}</p> : <p className="voice-state" role="status">{status}</p>}
       {state === 'recording' && <div className="recording-meter" aria-hidden="true"><span /> <strong>0:{String(elapsed).padStart(2, '0')}</strong> / 0:45</div>}
       {error && <p className="notice error" role="alert">{error}</p>}

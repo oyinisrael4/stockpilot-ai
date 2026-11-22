@@ -22,25 +22,41 @@ from core.services import open_stock, receive_stock, record_expense
 class Command(BaseCommand):
     help = "Create the fictional Juniper Market Supply workspace in an empty stockpilot_demo database."
 
+    def add_arguments(self, parser):
+        parser.add_argument("--hosted", action="store_true", help="Explicitly seed an empty, isolated production demo database.")
+
     def handle(self, *args, **options):
-        if not settings.DEBUG or connection.settings_dict["NAME"] != "stockpilot_demo":
-            raise CommandError("Demo seeding requires DJANGO_DEBUG=1 and the dedicated stockpilot_demo database.")
+        hosted = options.get("hosted", False)
+        if connection.settings_dict["NAME"] != "stockpilot_demo" or (not settings.DEBUG and not hosted):
+            raise CommandError("Demo seeding requires the dedicated stockpilot_demo database and explicit hosted opt-in outside development.")
+        if hosted and (settings.DEBUG or os.getenv("STOCKPILOT_PUBLIC_DEMO") != "1"):
+            raise CommandError("Hosted seeding requires production settings and public demo isolation.")
         if Business.objects.exists() or User.objects.exists():
             raise CommandError("Demo seeding requires an empty database. Existing data was left untouched.")
+        if hosted and not os.getenv("STOCKPILOT_DEMO_PASSWORD"):
+            raise CommandError("Configure the private demo owner password before hosted startup.")
+        visitor_password = os.getenv("STOCKPILOT_DEMO_VISITOR_PASSWORD") if hosted else None
+        if hosted and not visitor_password:
+            raise CommandError("Configure a separate demo visitor password before hosted startup.")
         password = os.environ.get("STOCKPILOT_DEMO_PASSWORD") or getpass("Choose a password for demo-owner: ")
         profile = User(username="demo-owner", email="owner@juniper.example.invalid", first_name="Avery")
         try:
             validate_password(password, profile)
+            if visitor_password:
+                validate_password(visitor_password, User(username="demo-visitor"))
         except ValidationError as error:
             raise CommandError(" ".join(error.messages)) from None
         with transaction.atomic(), connection.cursor() as cursor:
             cursor.execute("LOCK TABLE core_business, core_user IN SHARE ROW EXCLUSIVE MODE")
             if Business.objects.exists() or User.objects.exists():
                 raise CommandError("Demo database is no longer empty.")
-            self.seed(profile, password)
+            self.seed(profile, password, hosted=hosted)
+            if hosted:
+                visitor = User.objects.create_user("demo-visitor", "visitor@juniper.example.invalid", visitor_password, first_name="Demo visitor")
+                Membership.objects.create(business=Business.objects.get(), user=visitor, role=Membership.Role.MANAGER)
         self.stdout.write(self.style.SUCCESS("Created Juniper Market Supply · Demo. Username: demo-owner"))
 
-    def seed(self, owner, password):
+    def seed(self, owner, password, hosted=False):
         zone = ZoneInfo("Africa/Lagos")
         today = timezone.localdate(timezone=zone)
 
@@ -81,7 +97,9 @@ class Command(BaseCommand):
                 open_stock(business, owner, product.id, D(quantity), D(cost))
                 products.append(product)
 
-        for offset in range(70, -1, -1):
+        # Keep hosted initialization bounded on a sleeping free database. Weekly
+        # transactions retain genuine history without a long remote transaction.
+        for offset in (range(63, -1, -7) if hosted else range(70, -1, -1)):
             day = today - timedelta(days=offset)
             if offset in (44, 17):
                 with at(offset, 8):

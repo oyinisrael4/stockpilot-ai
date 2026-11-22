@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
@@ -39,6 +40,19 @@ DATABASES = {"default": {
     "OPTIONS": {"connect_timeout": 5, "options": "-c statement_timeout=30000 -c lock_timeout=10000",
                 **({"sslmode": os.environ["PGSSLMODE"]} if os.getenv("PGSSLMODE") else {})},
 }}
+if os.getenv("DATABASE_URL"):
+    parsed = urlsplit(os.environ["DATABASE_URL"])
+    if parsed.scheme not in ("postgres", "postgresql") or not parsed.hostname or "-pooler" in parsed.hostname:
+        raise ImproperlyConfigured("Use a direct PostgreSQL DATABASE_URL, not a transaction-pooler endpoint.")
+    sslmode = parse_qs(parsed.query).get("sslmode", ["verify-full"])[0]
+    if not DEBUG and sslmode != "verify-full":
+        raise ImproperlyConfigured("Production DATABASE_URL requires sslmode=verify-full.")
+    DATABASES["default"].update(NAME=unquote(parsed.path.lstrip("/")), USER=unquote(parsed.username or ""),
+                                PASSWORD=unquote(parsed.password or ""), HOST=parsed.hostname, PORT=str(parsed.port or 5432),
+                                CONN_MAX_AGE=0,
+                                OPTIONS={"connect_timeout": 15, "sslmode": sslmode,
+                                         **({"sslrootcert": os.getenv("PGSSLROOTCERT", "system")} if sslmode == "verify-full" else {}),
+                                         "options": "-c statement_timeout=30000 -c lock_timeout=10000"})
 AUTH_USER_MODEL = "core.User"
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": f"django.contrib.auth.password_validation.{validator}"}
@@ -49,13 +63,14 @@ USE_TZ = True
 TIME_ZONE = "UTC"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Browsers share cookies across ports on the same host. Keep demo sign-in separate.
-if DATABASES["default"]["NAME"] == "stockpilot_demo":
+if DATABASES["default"]["NAME"] == "stockpilot_demo" and os.getenv("STOCKPILOT_DEMO_COOKIE_ISOLATION", "1") == "1":
     SESSION_COOKIE_NAME = "stockpilot_demo_sessionid"
     CSRF_COOKIE_NAME = "stockpilot_demo_csrftoken"
 SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SAMESITE = CSRF_COOKIE_SAMESITE = "Lax"
 PASSWORD_RESET_TIMEOUT = 3600
 ALLOW_REGISTRATION = os.getenv("STOCKPILOT_ALLOW_REGISTRATION", "1" if DEBUG else "0") == "1"
+PASSWORD_RESET_ENABLED = os.getenv("STOCKPILOT_PASSWORD_RESET_ENABLED", "1") == "1"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 250
 SESSION_COOKIE_AGE = 60 * 60 * 12
@@ -89,10 +104,25 @@ REST_FRAMEWORK = {
 ASSISTANT_API_KEY = os.getenv("STOCKPILOT_AI_API_KEY", "")
 ASSISTANT_MODEL = os.getenv("STOCKPILOT_AI_MODEL", "")
 ASSISTANT_PROVIDER = os.getenv("STOCKPILOT_AI_PROVIDER", "openai")
-if ASSISTANT_PROVIDER not in ("openai", "ollama"):
-    raise ImproperlyConfigured("STOCKPILOT_AI_PROVIDER must be openai or ollama")
+if ASSISTANT_PROVIDER not in ("openai", "ollama", "groq"):
+    raise ImproperlyConfigured("STOCKPILOT_AI_PROVIDER must be openai, ollama or groq")
 ASSISTANT_ENDPOINT = os.getenv("STOCKPILOT_AI_ENDPOINT", "https://api.openai.com/v1/chat/completions")
 ASSISTANT_OLLAMA_ENDPOINT = os.getenv("STOCKPILOT_OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/chat")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+VOICE_PROVIDER = os.getenv("STOCKPILOT_VOICE_PROVIDER", "offline")
+GROQ_VOICE_MODEL = os.getenv("STOCKPILOT_GROQ_VOICE_MODEL", "whisper-large-v3-turbo")
+if VOICE_PROVIDER not in ("offline", "groq"):
+    raise ImproperlyConfigured("STOCKPILOT_VOICE_PROVIDER must be offline or groq")
+# Deliberately conservative, shared application budgets; provider limits still apply.
+CLOUD_CHAT_DAILY_LIMIT = int(os.getenv("STOCKPILOT_CLOUD_CHAT_DAILY_LIMIT", "50"))
+CLOUD_CHAT_MINUTE_LIMIT = int(os.getenv("STOCKPILOT_CLOUD_CHAT_MINUTE_LIMIT", "2"))
+CLOUD_AUDIO_DAILY_SECONDS = int(os.getenv("STOCKPILOT_CLOUD_AUDIO_DAILY_SECONDS", "600"))
+CLOUD_AUDIO_HOURLY_SECONDS = int(os.getenv("STOCKPILOT_CLOUD_AUDIO_HOURLY_SECONDS", "120"))
+if not (1 <= CLOUD_CHAT_DAILY_LIMIT <= 500 and 1 <= CLOUD_CHAT_MINUTE_LIMIT <= 5
+        and 1 <= CLOUD_AUDIO_DAILY_SECONDS <= 3600 and 1 <= CLOUD_AUDIO_HOURLY_SECONDS <= 600):
+    raise ImproperlyConfigured("Cloud inference budgets exceed this free-demo configuration's allowed bounds.")
+SERVE_FRONTEND = os.getenv("STOCKPILOT_SERVE_FRONTEND") == "1"
+FRONTEND_DIST = ROOT / "frontend" / "dist"
 SPECTACULAR_SETTINGS = {
     "TITLE": "StockPilot AI API",
     "VERSION": "0.3.0",
@@ -115,6 +145,11 @@ if not DEBUG:
         raise ImproperlyConfigured("Console email is disabled in production.")
     if os.getenv("STOCKPILOT_PUBLIC_DEMO") == "1" and DATABASES["default"]["NAME"] != "stockpilot_demo":
         raise ImproperlyConfigured("Public demo mode requires the dedicated stockpilot_demo database.")
+    if ASSISTANT_PROVIDER == "groq" or VOICE_PROVIDER == "groq":
+        if not GROQ_API_KEY or os.getenv("STOCKPILOT_CLOUD_FREE_ONLY") != "1":
+            raise ImproperlyConfigured("Cloud deployment requires a private Groq key and explicit Free-plan confirmation.")
+    if ASSISTANT_PROVIDER == "groq" and ASSISTANT_MODEL not in ("openai/gpt-oss-20b", "openai/gpt-oss-120b"):
+        raise ImproperlyConfigured("Select a supported Groq strict-output model.")
 
 if not DEBUG:
     LOGGING = {

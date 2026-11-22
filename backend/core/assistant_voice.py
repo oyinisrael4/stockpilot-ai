@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 from .inference import InferenceBusy, inference_slot
 from .models import Membership
 from .views import TenantMixin
+from . import cloud_inference
 
 SAMPLE_RATE = 16000
 MAX_FRAMES = SAMPLE_RATE * 45
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 class VoiceUnavailable(APIException):
     status_code = 503
-    default_detail = "Local transcription is unavailable. Check the offline model installation or return to typing."
+    default_detail = "Transcription is unavailable. Check the configured speech provider or return to typing."
 
 
 class VoiceThrottle(UserRateThrottle):
@@ -59,6 +60,8 @@ def speech_model():
 
 
 def transcribe(pcm):
+    if settings.VOICE_PROVIDER == "groq":
+        return cloud_inference.transcribe(pcm)
     import numpy as np
 
     samples = np.frombuffer(pcm, dtype="<i2").astype(np.float32) / 32768
@@ -89,12 +92,14 @@ class Transcription(TenantMixin, APIView):
             raise ValidationError("No microphone audio was provided.")
 
         if not inference_lock.acquire(blocking=False):
-            raise VoiceUnavailable("Local transcription is busy. Retry in a moment.")
+            raise VoiceUnavailable("Transcription is busy. Retry in a moment.")
         try:
             with inference_slot():
                 transcript = transcribe(pcm)
+        except cloud_inference.CloudUnavailable as error:
+            raise VoiceUnavailable(str(error)) from None
         except InferenceBusy:
-            raise VoiceUnavailable("Local AI is busy. Retry after the current request finishes.") from None
+            raise VoiceUnavailable("AI is busy. Retry after the current request finishes.") from None
         except VoiceUnavailable:
             raise
         except Exception as exc:

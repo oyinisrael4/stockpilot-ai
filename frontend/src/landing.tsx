@@ -14,7 +14,7 @@ export function StockSculpture() {
   return <img className="stock-sculpture" src={import.meta.env.BASE_URL + 'portfolio/retail-studio.webp'} alt="" fetchPriority="high" />
 }
 
-export function Landing({ signedIn, showcase = false }: { signedIn: boolean; showcase?: boolean }) {
+export function Landing({ signedIn, showcase = false, demoUrl }: { signedIn: boolean; showcase?: boolean; demoUrl?: string }) {
   function scrollSection(event: MouseEvent<HTMLAnchorElement>) {
     if (!showcase) return
     event.preventDefault()
@@ -25,7 +25,7 @@ export function Landing({ signedIn, showcase = false }: { signedIn: boolean; sho
   const [active, setActive] = useState(1)
   const view = views[active]
   const local = ['localhost', '127.0.0.1'].includes(location.hostname)
-  const demo = import.meta.env.VITE_STOCKPILOT_DEMO_URL || (local ? 'http://127.0.0.1:5196/login' : '')
+  const demo = demoUrl || import.meta.env.VITE_STOCKPILOT_DEMO_URL || (local ? 'http://127.0.0.1:5196/login' : '')
   return <div className="landing landing-v2">
     <a className="skip" href="#product" onClick={scrollSection}>Skip to content</a>
     <header className="landing-nav">

@@ -1,5 +1,6 @@
 """Read-only publication gate. Never prints credentials or file contents."""
 import hashlib
+import io
 import json
 from pathlib import Path
 import re
@@ -7,15 +8,15 @@ import subprocess
 from dotenv import dotenv_values
 
 ROOT = Path(__file__).resolve().parents[1]
-config = dotenv_values(ROOT / '.env')
-secrets = [v.encode() for k, v in config.items() if v and len(v) >= 8
-           and any(word in k for word in ('SECRET', 'PASSWORD', 'API_KEY'))]
+config = [item for path in (ROOT / '.env', ROOT / 'deploy/.env.render') for item in dotenv_values(path).items()]
+secrets = [v.encode() for k, v in config if v and len(v) >= 8
+           and any(word in k for word in ('SECRET', 'PASSWORD', 'API_KEY', 'DATABASE_URL'))]
 password = ROOT / '.local/portfolio-demo-password'
 if password.exists():
     secrets.append(password.read_bytes().strip())
 patterns = [rb'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----',
             rb'gh[pousr]_[A-Za-z0-9]{30,}', rb'github_pat_[A-Za-z0-9_]{50,}',
-            rb'AKIA[A-Z0-9]{16}', rb'sk-(?:proj-)?[A-Za-z0-9_-]{35,}']
+            rb'AKIA[A-Z0-9]{16}', rb'sk-(?:proj-)?[A-Za-z0-9_-]{35,}', rb'gsk_[A-Za-z0-9]{40,}']
 findings = []
 
 def git(*args):
@@ -45,13 +46,13 @@ history_blobs = 0
 if objects:
     # One process avoids hundreds of slow Git launches on Windows.
     batch = subprocess.Popen(['git', 'cat-file', '--batch'], cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    batch.stdin.write(('\n'.join(line.partition(' ')[0] for line in objects) + '\n').encode())
-    batch.stdin.close()
+    output, _ = batch.communicate(('\n'.join(line.partition(' ')[0] for line in objects) + '\n').encode())
+    stream = io.BytesIO(output)
     for line in objects:
         oid, _, name = line.partition(' ')
-        _, kind, size = batch.stdout.readline().split()
-        content = batch.stdout.read(int(size))
-        batch.stdout.read(1)
+        _, kind, size = stream.readline().split()
+        content = stream.read(int(size))
+        stream.read(1)
         if kind == b'blob':
             history_blobs += 1
             if forbidden(name): findings.append('Excluded artifact in history: ' + name)

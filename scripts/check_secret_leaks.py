@@ -5,9 +5,9 @@ import subprocess
 from dotenv import dotenv_values
 
 root = Path(__file__).resolve().parents[1]
-config = dotenv_values(root / ".env")
-secrets = [value for key, value in config.items() if value and len(value) >= 8
-           and any(word in key for word in ("SECRET", "PASSWORD", "API_KEY"))]
+config = [item for path in (root / ".env", root / "deploy/.env.render") for item in dotenv_values(path).items()]
+secrets = [value for key, value in config if value and len(value) >= 8
+           and any(word in key for word in ("SECRET", "PASSWORD", "API_KEY", "DATABASE_URL"))]
 demo = root / ".local" / "portfolio-demo-password"
 if demo.exists():
     secrets.append(demo.read_text().strip())

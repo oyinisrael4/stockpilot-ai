@@ -27,5 +27,5 @@ class ApiPrivacyMiddleware:
         if request.path.startswith("/api/"):
             response["Cache-Control"] = "no-store, private"
             response["Pragma"] = "no-cache"
-        response["Permissions-Policy"] = "microphone=(self), camera=(), geolocation=()"
+        response.setdefault("Permissions-Policy", "microphone=(self), camera=(), geolocation=()")
         return response

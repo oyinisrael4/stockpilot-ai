@@ -13,6 +13,7 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError as SchemaError
 
 from .inference import InferenceBusy, inference_slot
+from . import cloud_inference
 
 log = logging.getLogger(__name__)
 ACTIONS = ("profit", "sales", "expenses", "operating_loss", "loss", "returns", "top", "stock",
@@ -43,7 +44,8 @@ INJECTION = re.compile(
 
 
 def active_provider():
-    return bool(settings.ASSISTANT_MODEL and (settings.ASSISTANT_PROVIDER == "ollama" or settings.ASSISTANT_API_KEY))
+    key = settings.GROQ_API_KEY if settings.ASSISTANT_PROVIDER == "groq" else settings.ASSISTANT_API_KEY
+    return bool(settings.ASSISTANT_MODEL and (settings.ASSISTANT_PROVIDER == "ollama" or key))
 
 
 class ProviderUnavailable(Exception):
@@ -70,7 +72,8 @@ def provider_intent(prompt, today, currency, context=None):
                 raise ValueError("Ollama mode requires a downloaded model")
         elif endpoint.scheme != "https":
             raise ValueError("Hosted assistant endpoint requires HTTPS")
-        output = "Return one JSON object for a supported StockPilot business intent." if local else (
+        cloud = settings.ASSISTANT_PROVIDER == "groq"
+        output = "Return one JSON object for a supported StockPilot business intent." if local or cloud else (
             "Call select_workspace_intent once with a supported StockPilot business intent."
         )
         instructions = (
@@ -115,6 +118,14 @@ def provider_intent(prompt, today, currency, context=None):
                          {"role": "user", "content": json.dumps({"message": prompt, **(context or {})}, ensure_ascii=False)}],
         }
         headers = {"Content-Type": "application/json"}
+        if cloud:
+            with inference_slot():
+                arguments = cloud_inference.intent(payload, SCHEMA)
+            intent = json.loads(arguments)
+            validate(intent, SCHEMA)
+            if any(len(value) > 500 for value in intent.values()):
+                raise ValueError("Provider intent too large")
+            return {key: value.strip() for key, value in intent.items() if value.strip()}
         if local:
             payload.update(format=SCHEMA, stream=False, think=False,
                            options={"num_ctx": 4096, "num_predict": 800, "temperature": 0})
@@ -160,8 +171,10 @@ def provider_intent(prompt, today, currency, context=None):
         if type(tokens) is int:
             log.info("Assistant intent provider tokens: %d", tokens)
         return {key: value.strip() for key, value in intent.items() if value.strip()}
+    except cloud_inference.CloudUnavailable as error:
+        raise ProviderUnavailable(str(error)) from None
     except InferenceBusy:
-        raise ProviderUnavailable("Local AI is busy. Retry after the current request finishes.") from None
+        raise ProviderUnavailable("AI is busy. Retry after the current request finishes.") from None
     except (DatabaseError, HTTPError, URLError, TimeoutError, OSError, AttributeError, KeyError, IndexError, TypeError, ValueError, SchemaError) as error:
         log.warning("Assistant intent provider unavailable (%s)", type(error).__name__)
         raise ProviderUnavailable from None

@@ -1,4 +1,5 @@
 import logging
+import os
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.tokens import default_token_generator
@@ -12,7 +13,7 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, generics, mixins, viewsets
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import APIException, PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle, SimpleRateThrottle
@@ -21,6 +22,15 @@ from rest_framework.views import APIView
 from . import serializers as s
 from .models import Business, Category, Membership, Product, Receipt, StockMovement, Supplier, User
 from .services import audit, open_stock, receive_stock
+
+
+class Live(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    @extend_schema(responses={200: dict})
+    def get(self, request):
+        return Response({"status": "alive"})
 
 
 class Health(APIView):
@@ -42,7 +52,8 @@ class Session(APIView):
 
     @extend_schema(responses={200: dict})
     def get(self, request):
-        return Response({"user": s.Profile(request.user).data if request.user.is_authenticated else None})
+        return Response({"user": s.Profile(request.user).data if request.user.is_authenticated else None,
+                         "public_demo": os.getenv("STOCKPILOT_PUBLIC_DEMO") == "1"})
 
 
 class AccountIPThrottle(SimpleRateThrottle):
@@ -97,6 +108,19 @@ class Login(AccountAction):
         return Response(s.Profile(user).data)
 
 
+class DemoLogin(AccountAction):
+    @extend_schema(request=None, responses={200: s.Profile})
+    def post(self, request):
+        if os.getenv("STOCKPILOT_PUBLIC_DEMO") != "1" or connection.settings_dict["NAME"] != "stockpilot_demo":
+            raise PermissionDenied("Public demo entry is disabled.")
+        user = User.objects.filter(username="demo-visitor", is_active=True).first()
+        if not user or not Membership.objects.filter(user=user, role=Membership.Role.MANAGER,
+                                                      business__name="Juniper Market Supply · Demo").exists():
+            raise ValidationError("The fictional demo has not been initialized. Contact the demo owner.")
+        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        return Response(s.Profile(user).data)
+
+
 class Logout(APIView):
     @extend_schema(request=None, responses={204: None})
     def post(self, request):
@@ -110,12 +134,21 @@ class Profile(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+    def perform_update(self, serializer):
+        if os.getenv("STOCKPILOT_PUBLIC_DEMO") == "1" and self.request.user.username == "demo-visitor":
+            raise PermissionDenied("The shared demo identity cannot be edited.")
+        serializer.save()
+
 
 class PasswordReset(AccountAction):
     serializer_class = s.ResetRequest
 
     @extend_schema(responses={204: None})
     def post(self, request):
+        if not settings.PASSWORD_RESET_ENABLED:
+            failure = APIException("Email recovery is unavailable in this demo. Contact the demo owner.")
+            failure.status_code = 503
+            raise failure
         email = self.validated_input()["email"].lower()
         user = User.objects.filter(email=email, is_active=True).first()
         if user and user.has_usable_password():

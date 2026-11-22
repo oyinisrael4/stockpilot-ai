@@ -6,7 +6,13 @@ StockPilot AI is a business operations workspace by Israel Oyinlola. It covers a
 
 ![StockPilot V2 overview, captured in the fictional Juniper workspace](docs/screenshots/phase61-overview-1440.png)
 
-## Public portfolio showcase — zero backend required
+## Full online application — deployment in preparation
+
+The primary deployment is now the complete application on **Render Free**, with **Neon Free PostgreSQL** and **Groq Free** chat/speech. The static showcase remains an additional resource. See the [full-stack deployment guide](docs/FREE_FULLSTACK_DEPLOYMENT.md) for account setup, private credentials, quotas, security, verification and limitations. No verified Render URL is available yet.
+
+Groq uses strict structured intents with `openai/gpt-oss-20b` and speech transcription with `whisper-large-v3-turbo`. Financial calculations and confirmations stay in Django. Local Ollama and offline Whisper remain supported. Free services may sleep, throttle or suspend; no paid fallback or automatic upgrade is configured.
+
+## Additional static portfolio showcase — zero backend required
 
 The full working application and the public portfolio have separate builds. The portfolio presents genuine product captures and an explicitly fictional browser sandbox: add products, review/confirm a sale, inspect its stock/profit effects, try a guided transaction proposal and reset. No real payments, database, live AI or microphone processing are available in the static demo. Its sample records never come from a private workspace. Ollama and Whisper remain available in the complete local application.
 

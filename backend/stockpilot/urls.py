@@ -1,4 +1,5 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
+from core.frontend import frontend
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework.routers import SimpleRouter
 
@@ -19,11 +20,13 @@ router.register("assistant/conversations", assistant_views.Conversations, basena
 router.register("assistant/proposals", assistant_views.Proposals, basename="assistant-proposals")
 
 urlpatterns = [path("api/v1/", include([
+    path("live/", views.Live.as_view()),
     path("health/", views.Health.as_view()),
     path("schema/", SpectacularAPIView.as_view()),
     path("auth/session/", views.Session.as_view()),
     path("auth/register/", views.Register.as_view()),
     path("auth/login/", views.Login.as_view()),
+    path("auth/demo/", views.DemoLogin.as_view()),
     path("auth/logout/", views.Logout.as_view()),
     path("auth/profile/", views.Profile.as_view()),
     path("auth/reset/", views.PasswordReset.as_view()),
@@ -40,4 +43,4 @@ urlpatterns = [path("api/v1/", include([
     path(tenant + "assistant/status/", assistant_views.AssistantStatus.as_view()),
     path(tenant + "assistant/transcribe/", assistant_voice.Transcription.as_view()),
     path(tenant, include(router.urls)),
-]))]
+])) , re_path(r"^(?!api(?:/|$))(?P<path>.*)$", frontend)]

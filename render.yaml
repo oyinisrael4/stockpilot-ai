@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: stockpilot-ai
+    runtime: docker
+    plan: free
+    region: ohio
+    repo: https://github.com/oyinisrael4/stockpilot-ai
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/live/
+    autoDeployTrigger: "off"
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: STOCKPILOT_DEMO_PASSWORD
+        sync: false
+      - key: STOCKPILOT_DEMO_VISITOR_PASSWORD
+        sync: false
+      - key: STOCKPILOT_PUBLIC_DEMO
+        value: "1"
+      - key: STOCKPILOT_ALLOW_REGISTRATION
+        value: "0"
+      - key: STOCKPILOT_PASSWORD_RESET_ENABLED
+        value: "0"
+      - key: STOCKPILOT_AI_PROVIDER
+        value: groq
+      - key: STOCKPILOT_AI_MODEL
+        value: openai/gpt-oss-20b
+      - key: STOCKPILOT_VOICE_PROVIDER
+        value: groq
+      - key: STOCKPILOT_GROQ_VOICE_MODEL
+        value: whisper-large-v3-turbo
+      - key: STOCKPILOT_CLOUD_FREE_ONLY
+        value: "1"
+      - key: STOCKPILOT_SERVE_FRONTEND
+        value: "1"
+      - key: STOCKPILOT_SEED_HOSTED_DEMO
+        value: "1"
+      - key: DJANGO_EMAIL_BACKEND
+        value: django.core.mail.backends.locmem.EmailBackend

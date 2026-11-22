@@ -295,6 +295,11 @@ class Expense(BusinessRecord):
         constraints = [models.CheckConstraint(condition=Q(amount__gt=0), name="positive_expense")]
 
 
+class InferenceUsage(models.Model):
+    key = models.CharField(max_length=80, unique=True)
+    units = models.PositiveIntegerField(default=0)
+
+
 class AssistantConversation(BusinessRecord):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=90, default="New conversation")

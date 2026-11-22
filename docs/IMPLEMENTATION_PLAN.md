@@ -114,6 +114,10 @@ The supplied StockPilot V2 attachments supersede the original visual references.
 
 ## Phase 8: public portfolio and deployment preparation
 
+### Revised primary deployment
+
+The owner replaced the static-only launch with a complete Render Free/Django/React, Neon Free PostgreSQL, Groq Free chat/speech deployment. The static build remains additional. Cloud providers preserve local Ollama/Whisper, structured backend intent validation, confirmation and accounting services. See FREE_FULLSTACK_DEPLOYMENT.md for current verification and account prerequisites. Hosted URL and public-host checks remain pending until actual deployment.
+
 - Added an independent static entry/build, relative assets and hash navigation. The complete operational application retains its existing entry point and backend services.
 - The public Juniper sandbox uses an authored fictional catalog and tab-local state. Checkout, stock boundaries, confirmation, cancellation, report summaries and reset are interactive. Guided assistant scenarios explicitly disclose that no model is connected. Voice is an illustrated explanation rather than simulated recognition.
 - Product capabilities and genuine isolated-demo captures appear on the landing page. Verified developer GitHub and repository-advertised portfolio links are included. No private workspace export or credentials are required for the public artifact.

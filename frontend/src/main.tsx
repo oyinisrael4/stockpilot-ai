@@ -35,10 +35,12 @@ const navigation = [
   { path: '/settings', label: 'Settings', icon: Settings },
 ]
 
-function Account({ signedIn }: { signedIn: (user: User) => void }) {
+function Account({ signedIn, publicDemo = false }: { signedIn: (user: User) => void; publicDemo?: boolean }) {
   const navigate = useNavigate()
   const [resetSent, setResetSent] = useState(false)
   const [resetDone, setResetDone] = useState(false)
+  const [demoError, setDemoError] = useState('')
+  const [enteringDemo, setEnteringDemo] = useState(false)
   const token = new URLSearchParams(location.hash.slice(1))
   const resetMode = token.has('uid') && token.has('token') && !resetDone
   function authForm(register: boolean) {
@@ -62,6 +64,12 @@ function Account({ signedIn }: { signedIn: (user: User) => void }) {
     </aside>
     <section className="account-card">
       <Link className="mobile-brand" to="/about"><Brand /></Link>
+      {publicDemo && <div className="notice"><strong>Shared fictional demonstration</strong><p>Visitors share the Juniper workspace and demo identity. Do not enter private information. Online AI and speech use Groq Cloud.</p><button className="primary" disabled={enteringDemo} onClick={async () => {
+        setEnteringDemo(true); setDemoError('')
+        try { signedIn(await api<User>('auth/demo/', 'POST')); navigate('/') }
+        catch(error) { setDemoError((error as Error).message) }
+        finally { setEnteringDemo(false) }
+      }}>{enteringDemo ? 'Opening demo…' : 'Enter fictional demo'}</button>{demoError && <p role="alert">{demoError}</p>}</div>}
       <Routes>
         <Route path="/register" element={<><Heading label="Get started" title="Create your workspace" subtitle="Set up your business and start building your catalog." />{authForm(true)}<p>Already registered? <Link to="/login">Sign in</Link></p></>} />
         <Route path="/reset" element={<>
@@ -122,7 +130,7 @@ function Overview({ business }: { business: Business }) {
   </>
 }
 
-function Workspace({ user, onUser }: { user: User; onUser: (user: User | null) => void }) {
+function Workspace({ user, onUser, publicDemo = false }: { user: User; onUser: (user: User | null) => void; publicDemo?: boolean }) {
   const workspaces = useData<Business[]>('businesses/')
   const [selected, select] = useState<number>()
   const [drawer, showDrawer] = useState(false)
@@ -177,6 +185,7 @@ function Workspace({ user, onUser }: { user: User; onUser: (user: User | null) =
               <span className="identity"><strong>{user.first_name || user.username}</strong><small>{business.role}</small></span><button className="icon-btn" title="Sign out" aria-label="Sign out" onClick={signOut}><LogOut size={18} /></button></div>
           </div>
           <main className="content" id="main-content" tabIndex={-1} key={business.id}>
+            {publicDemo && <p className="notice">Shared fictional demo · All visitors can change these records and view demo conversations. Do not enter private information. Online AI and speech use Groq Cloud. <a href="/showcase/">View portfolio showcase</a></p>}
             {signOutError && <div className="notice error" role="alert">{signOutError}</div>}
             <Routes>
               <Route path="/" element={<Overview business={business} />} />
@@ -217,11 +226,11 @@ function App() {
     return () => observer.disconnect()
   }, [])
   const { pathname } = useLocation()
-  const session = useData<{ user: User | null }>('auth/session/')
+  const session = useData<{ user: User | null; public_demo?: boolean }>('auth/session/')
   const [user, setUser] = useState<User | null>()
   const current = user === undefined ? session.data?.user : user
-  if (pathname === "/about" || (pathname === "/" && current === null)) return <Landing signedIn={Boolean(current)} />
-  return <Result {...session} retry={session.refresh}>{current ? <Workspace user={current} onUser={setUser} /> : <Account signedIn={setUser} />}</Result>
+  if (pathname === "/about" || (pathname === "/" && current === null)) return <Landing signedIn={Boolean(current)} demoUrl={session.data?.public_demo ? '/login' : undefined} />
+  return <Result {...session} retry={session.refresh}>{current ? <Workspace user={current} publicDemo={session.data?.public_demo} onUser={setUser} /> : <Account signedIn={setUser} publicDemo={session.data?.public_demo} />}</Result>
 }
 
 createRoot(document.getElementById('root')!).render(<BrowserRouter><App /></BrowserRouter>)

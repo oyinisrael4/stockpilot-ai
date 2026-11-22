@@ -88,7 +88,7 @@ export function Assistant({ business }: { business: Business }) {
   const [voiceOpen, showVoice] = useState(false)
   const input = useRef<HTMLTextAreaElement>(null)
   const history = useData<Page<Conversation>>(tenant(business, 'assistant/conversations/?page=' + historyPage + '&search=' + encodeURIComponent(historySearch)))
-  const status = useData<{ provider_enabled: boolean; provider: 'openai' | 'ollama' | null }>(tenant(business, 'assistant/status/'))
+  const status = useData<{ provider_enabled: boolean; provider: 'openai' | 'ollama' | 'groq' | null; voice_provider: 'offline' | 'groq' }>(tenant(business, 'assistant/status/'))
   const enabled = status.data?.provider_enabled
 
   function focusComposer() { requestAnimationFrame(() => input.current?.focus()) }
@@ -153,7 +153,7 @@ export function Assistant({ business }: { business: Business }) {
       <section className="panel assistant-chat" aria-label="StockPilot AI chat">
         <header className="chat-header"><span className="assistant-avatar"><Bot size={22} /></span><div><h2>StockPilot AI</h2>
           <p>{status.error ? 'Connection status unavailable' : enabled === undefined ? 'Checking connection…'
-            : !enabled ? 'Limited demonstration mode' : 'Ask about your business records'}</p></div>
+            : !enabled ? 'Limited demonstration mode' : status.data?.provider === 'groq' ? 'Cloud AI · Groq · Uses your conversation context' : 'Ask about your business records'}</p></div>
           <details className="chat-diagnostics"><summary>Connection details</summary><small>{enabled ? status.data?.provider : "Demonstration mode"}</small></details></header>
         {id ? <Thread key={id} business={business} id={id} send={send} latest={latest?.id === id ? latest.exchange : undefined} pending={pending} /> :
           <div className="chat-empty chat-welcome"><span className="assistant-avatar"><Sparkles size={34} /></span><h2>What would you like to know?</h2>
@@ -181,7 +181,7 @@ export function Assistant({ business }: { business: Business }) {
           <button className="secondary" disabled={busy} onClick={() => { setText('Sell 2 '); focusComposer() }}>Start a sale request</button></div></div>
       </aside>
     </div>
-    {voiceOpen && <VoiceDialog businessId={business.id} close={() => { showVoice(false); focusComposer() }} useTranscript={value => {
+    {voiceOpen && <VoiceDialog businessId={business.id} provider={status.data?.voice_provider} close={() => { showVoice(false); focusComposer() }} useTranscript={value => {
       const next = text.trim() ? text.trimEnd() + '\n' + value : value
       if (next.length > 2000) return false
       setText(next); showVoice(false); focusComposer()
