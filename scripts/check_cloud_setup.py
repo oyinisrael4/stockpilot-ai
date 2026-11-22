@@ -59,7 +59,7 @@ try:
         raw = response.read(262145)
     if len(raw) > 262144: raise ValueError()
     available = {row['id'] for row in json.loads(raw)['data']}
-    if not {'openai/gpt-oss-20b', 'whisper-large-v3-turbo'} <= available: raise ValueError()
+    if not {config.get('STOCKPILOT_AI_MODEL', 'openai/gpt-oss-120b'), config.get('STOCKPILOT_GROQ_VOICE_MODEL', 'whisper-large-v3-turbo')} <= available: raise ValueError()
     print('Groq: API key accepted; selected chat and speech model IDs are listed. No inference request was sent.')
 except Exception as error:
     raise SystemExit('Groq availability check failed (' + type(error).__name__ + '). Check the Free account/model permissions privately.') from None

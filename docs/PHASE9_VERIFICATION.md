@@ -1,13 +1,37 @@
-# Phase 9 verification
+# Phase 9 — verified public demo refinement
 
-Status: implemented and locally verified; public conversation validation is pending deployment. Do not treat this document as a completion declaration until the live gate is recorded.
+Verified November 22, 2026 on https://stockpilot-ai-p89q.onrender.com.
 
-Public registration remains disabled. No real-customer onboarding was enabled. The closed-registration page explains the portfolio status and links to the shared fictional demo. Local development preserves registration with required backend/frontend password confirmation, visibility controls and password rules.
+## Registration and portfolio scope
 
-The previous assistant selected a bounded intent and rendered fixed backend responses; connecting Groq did not give it a response-generation stage. Groq now has an open-ended analysis intent and a read-only explanation stage over workspace-scoped, deterministic insights. The explanation receives bounded prior questions and answers, selected periods, comparisons and record evidence. Findings require source references. Numbers in prose must be copied from cited server records; unsupported numeric claims fail validation. Suggestions and limitations are labelled separately. No generated explanation has a write path. Existing preview, role, confirmation and idempotency services remain authoritative.
+Production registration remains disabled at both API and UI. The public registration page explains that commercial onboarding is not available and directs visitors to the fictional interactive demo. The landing and login links reflect that status. Visitors can still enter the shared demo without creating an account.
 
-Local checks: 77 backend tests discovered, 74 passed and three optional live/local-model checks skipped. All ten browser tests passed against built React served by Django, including registration validity, confirmation, show/hide controls, closed-registration messaging, inventory, POS, reporting, assistant confirmations, microphone fallback and keyboard/mobile regression journeys. Production build and API schema validation passed. The publication audit found no matching secrets. One real Groq explanation using local fictional workspace records passed; it is not a substitute for live public-host conversations.
+Local registration remains functional. Password confirmation is required in frontend and backend, mismatches display “Passwords do not match”, both fields have accessible show/hide controls, and password rules remain enforced by Django. Invalid submissions create no partial workspace/account records. Tests cover independent membership, tenant isolation, matching/mismatched passwords, invalid inputs and the closed production endpoint.
 
-The free demo uses shared API allowances. Analysis currently requires a planning request and an explanation request; the default two requests/minute means full analytical turns should be paced. Provider quota and connectivity errors remain explicit; no paid fallback or automatic model upgrade is enabled. Local Ollama continues to use the existing deterministic insight rendering for analysis intents. Offline Whisper is unchanged.
+## Conversational change and safeguards
 
-Remaining gate: deploy to the existing Free Render service, test the requested natural conversations and unseen questions on the public host, check follow-ups and failures, verify production registration stays closed, and record outcomes here. Shared fictional verification conversations are retained; no private real-business records are used.
+The previous cloud model only selected fixed intents; backend templates supplied its answers. Connecting Groq therefore did not create an open-ended response-generation path. The deployed assistant now has an analysis path over bounded, workspace-scoped backend insights, previous user messages and assistant answers. It can provide contextual suggestions, explanations and clarifying guidance; greetings and unseen business questions are not restricted to a phrase list.
+
+Groq GPT-OSS 120B is selected on the existing Free account after live comparison showed better schema adherence than the smaller model. It writes qualitative guidance constrained by a structured output schema. Financial findings are rendered directly from backend evidence: a model citation alone is insufficient to establish a financial interpretation. Exact numerical values remain backend-owned in the supporting records. A regression test proves that a contradictory model claim cannot override recorded findings. Suggestions and limitations remain explicitly labelled. Model reasoning can still be imperfect; suggestions are advisory and are not guarantees about demand or business outcomes.
+
+Malformed, uncited or unsupported responses fail validation. A narrowly bounded normalization accepts only omitted unspecified intent details as empty strings, then validates the entire intent; unknown fields and operations are rejected. This does not invent prices, relax permissions, retry a paid model, or bypass confirmation. Provider outages, rate limits, quota exhaustion and invalid responses remain distinguishable from unsupported requests.
+
+All write requests retain the existing authorization, previews, explicit confirmation, stock locking, audit and idempotency services. General explanations have no write path. Typed and edited spoken messages share the conversation workflow. Offline Whisper remains operational. Local Ollama retains its existing model-assisted intents and deterministic backend insights; the new free-cloud narrative generation is not silently substituted into offline mode.
+
+## Verification evidence
+
+- Full backend suite: 80 tests discovered, 78 passed, two opt-in local-LLM tests skipped. This run included actual offline Whisper transcription. Earlier final targeted cloud/registration/finding tests also passed.
+- Ten local Edge browser journeys passed against production React assets served by Django, including password controls, registration, closed-registration messaging, financial workflows, assistant confirmation, keyboard/mobile layout and microphone fallback.
+- Both hosted end-to-end journeys passed: real cloud chat, contextual report follow-up, explicit/repeated sale confirmation, Neon persistence, actual Groq Whisper, browser microphone recording through a test device, editable transcription, mobile/desktop layout, HTTPS, cookies and security headers.
+- A separate public registration check passed: no active registration form, explicit portfolio explanation, API rejection with valid CSRF, functional demo entry, and 390/1440 px screenshots.
+- The production TypeScript/Vite build, schema validation and secret audit passed. No API keys, database credentials, model weights or local recordings were published.
+
+The public natural-language sequence passed all ten requested questions and an unseen shelf-space question. It included improvement, overall performance, declining profit, restocking, sales growth, product profitability, next-week priorities, simpler wording, last month and greeting/capability questions. Manual review then caught a contradictory financial interpretation; the renderer was strengthened so model prose cannot establish authoritative financial findings. The final deployed build was rechecked with improvement, simplification and last-month turns, all passing with backend-rendered findings. The full read-only conversation verification is reproducible with `python scripts/verify_public_conversation.py --live`; it consumes the shared free allowance and intentionally paces requests.
+
+Private verification logs/results are ignored under `.local`: `phase9-public-check.log`, `phase9-public-conversations.json`, `phase9-final-check.log`, `phase9-final-conversations.json`, `phase9-final-backend.log`, `phase9-browser-final.log`, `phase9-hosted-browser.log`, and `phase9-public-registration.log`. Fictional conversations and verification transactions retain their history rather than being erased.
+
+## Remaining limitations
+
+Free Render/Neon services can sleep or suspend. Groq and application quotas apply. A full analytical turn currently uses an intent request and an explanation request; the shared two-requests/minute allowance therefore requires pacing. The default daily application allowance remains conservative; testing consumed much of the day’s allowance. There is no paid fallback or automatic upgrade. Public demo records and the visitor identity are shared, so visitors must not enter private information. Email recovery remains disabled. This portfolio verification does not certify real-business production readiness or unlimited AI availability.
+
+[Public registration — desktop](screenshots/phase9-registration-1440.png) · [mobile](screenshots/phase9-registration-390.png).

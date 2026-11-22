@@ -124,3 +124,7 @@ The owner replaced the static-only launch with a complete Render Free/Django/Rea
 - Publication audit checks git-visible files, every reachable historical blob, known local secret values, credential patterns, excluded model/database artifacts and the static output. There was no Git history or remote at the start of this phase.
 - Added a zero-cost hosting comparison, static security headers, an inactive manual Pages workflow template, reproducible build/publishing instructions and final screenshots. No deployment, repository publication, tunnel or charge is authorized.
 - Verification and remaining external launch gates are recorded in PHASE8_VERIFICATION.md and PUBLIC_SHOWCASE.md.
+
+## Phase 9 — conversational intelligence and public demo refinement
+
+Public commercial registration remains closed; local registration adds password confirmation and visibility controls. Groq now generates evidence-grounded qualitative guidance while the backend renders authoritative financial findings and retains transaction confirmation. All requested live questions, contextual follow-ups and an unseen question were checked; the final deployed finding safeguard was separately reverified. See PHASE9_VERIFICATION.md for evidence, skipped optional tests and shared free-tier limitations. No paid infrastructure was activated.

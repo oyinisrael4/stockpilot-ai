@@ -16,7 +16,7 @@ Public-hosted verification on November 22, 2026 passed both end-to-end journeys:
 
 Visitors share fictional records and a demo identity. Do not enter private information. Free services may sleep or exhaust quotas; email recovery is disabled for this demo. No local computer or offline inference endpoint is exposed.
 
-Groq uses strict structured intents with `openai/gpt-oss-20b` and speech transcription with `whisper-large-v3-turbo`. Financial calculations and confirmations stay in Django. Local Ollama and offline Whisper remain supported. Free services may sleep, throttle or suspend; no paid fallback or automatic upgrade is configured.
+Groq uses strict structured intents with `openai/gpt-oss-120b` and speech transcription with `whisper-large-v3-turbo`. Financial calculations and confirmations stay in Django. Local Ollama and offline Whisper remain supported. Free services may sleep, throttle or suspend; no paid fallback or automatic upgrade is configured.
 
 ## Additional static portfolio showcase — zero backend required
 
@@ -273,4 +273,4 @@ Security checks can be repeated with `scripts/check_secret_leaks.py`, pip-audit 
 
 Public commercial registration remains closed. The registration page explains the portfolio status and directs visitors to the fictional demo. Local development retains registration, with required password confirmation and accessible show/hide controls.
 
-Groq can interpret open-ended business discussions and generate read-only explanations from scoped backend insights. Findings cite supporting records, suggestions remain distinct from facts, and uncited numeric claims are rejected. Transactions still require explicit preview confirmation. Live Phase 9 verification is pending; see docs/PHASE9_VERIFICATION.md for the actual gate results.
+Groq can interpret open-ended business discussions and generate read-only explanations from scoped backend insights. Findings cite supporting records, suggestions remain distinct from facts, and uncited numeric claims are rejected. Transactions still require explicit preview confirmation. Phase 9 is verified on the public host: all requested conversations and an unseen question passed, followed by a final deployed check of deterministic financial findings and contextual follow-ups. See [Phase 9 verification](docs/PHASE9_VERIFICATION.md) for test results and free-tier limitations.
