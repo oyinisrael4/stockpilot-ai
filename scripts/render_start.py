@@ -13,6 +13,7 @@ os.environ.setdefault("DJANGO_TRUSTED_ORIGINS", "https://" + host)
 os.environ.setdefault("STOCKPILOT_PUBLIC_URL", "https://" + host)
 os.environ["DJANGO_TRUST_HTTPS_PROXY"] = "1"
 os.environ["STOCKPILOT_DEMO_COOKIE_ISOLATION"] = "0"
+os.environ.setdefault("PGSSLROOTCERT", "/etc/ssl/certs/ca-certificates.crt")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "stockpilot.settings")
 

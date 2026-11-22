@@ -8,6 +8,8 @@ RUN npm run build && npm run build:showcase
 FROM python:3.11-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=10000
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 COPY backend/requirements-base.txt backend/requirements-cloud.txt backend/
 RUN pip install --no-cache-dir -r backend/requirements-cloud.txt \
     && useradd --create-home stockpilot
