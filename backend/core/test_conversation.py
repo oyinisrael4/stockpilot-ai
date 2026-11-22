@@ -36,6 +36,15 @@ class ConversationTests(APITestCase):
                 answer_question(self.business, 'What next?', {'action': 'analysis'}, [])
         self.assertFalse(Sale.objects.exists())
 
+    @patch('core.business_conversation.generate')
+    def test_model_interpretation_cannot_override_recorded_financial_findings(self, generate):
+        generated_claim = 'Revenue grew while the average transaction value fell sharply.'
+        generate.return_value = json.dumps({'sections': [{'kind': 'finding', 'text': generated_claim, 'sources': ['F6']}]})
+        answer = answer_question(self.business, 'Explain performance', {'action': 'analysis'}, [])
+        self.assertNotIn(generated_claim, answer['text'])
+        self.assertIn('Net sales', answer['text'])
+        self.assertIn('current: 0.00', answer['text'])
+
     @override_settings(ALLOW_REGISTRATION=False)
     def test_production_registration_is_closed(self):
         result = self.client.post('/api/v1/auth/register/', {}, format='json')

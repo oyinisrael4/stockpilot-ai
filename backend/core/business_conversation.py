@@ -11,6 +11,20 @@ from .cloud_inference import intent as generate, CloudUnavailable
 from .inference import inference_slot, InferenceBusy
 
 
+def recorded_fact(fact):
+    """Render evidence verbatim; generated prose never establishes a finding."""
+    try:
+        value = json.loads(fact['value'])
+    except (ValueError, TypeError):
+        return fact['record'].replace('_', ' ') + ': ' + fact['value']
+    if not isinstance(value, dict):
+        return fact['record'].replace('_', ' ') + ': ' + str(value)
+    label = value.get('label') or value.get('name') or fact['record'].split('.')[0].replace('_', ' ')
+    fields = {key.replace('_', ' '): item for key, item in value.items()
+              if key not in ('label', 'name', 'key', 'id') and not key.endswith('_id') and item is not None}
+    return str(label) + ' — ' + '; '.join(f'{key}: {item}' for key, item in fields.items())
+
+
 def answer_question(business, question, intent, recent):
     params = select_range({**intent, 'comparison': intent.get('comparison') or 'previous'}, business)
     data = insights(business, **params)
@@ -57,9 +71,14 @@ def answer_question(business, question, intent, recent):
                                      for n in re.findall(r'\d[\d,]*(?:\.\d+)?', value)}
             cited = ' '.join(facts[key]['value'] for key in section['sources'])
             if not numbers(text).issubset(numbers(cited)): raise ValueError()
+            if section['kind'] == 'finding':
+                # A source citation alone cannot prove a model's interpretation.
+                # Establish findings with server records, never inferred ratios
+                # or causal claims supplied by the language model.
+                text = '\n'.join(recorded_fact(facts[key]) for key in section['sources'][:3])
             prose.append(section['kind'].capitalize() + ': ' + text)
         return response('\n\n'.join(prose), table('Supporting workspace records', ['Reference', 'Record', 'Recorded value'],
-                        [[key, facts[key]['record'], facts[key]['value']] for key in sources[:16]], '/insights'))
+                        [[key, facts[key]['record'].split('.')[0].replace('_', ' ').title(), recorded_fact(facts[key])] for key in sources[:16]], '/insights'))
     except (CloudUnavailable, InferenceBusy) as error:
         raise ProviderUnavailable(str(error)) from None
     except (ValueError, KeyError, TypeError, SchemaValidationError) as error:
