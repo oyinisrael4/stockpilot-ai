@@ -31,7 +31,7 @@ services:
       - key: STOCKPILOT_AI_PROVIDER
         value: groq
       - key: STOCKPILOT_AI_MODEL
-        value: openai/gpt-oss-20b
+        value: openai/gpt-oss-120b
       - key: STOCKPILOT_VOICE_PROVIDER
         value: groq
       - key: STOCKPILOT_GROQ_VOICE_MODEL

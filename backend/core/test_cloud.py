@@ -109,6 +109,23 @@ class CloudTests(APITestCase):
         self.assertEqual(opener.return_value.open.call_count, 1)
         self.assertFalse(AssistantProposal.objects.exists())
 
+    @patch('core.cloud_inference.build_opener')
+    def test_partial_provider_intent_only_defaults_unspecified_fields(self, opener):
+        body = json.dumps({'error': {'code': 'json_validate_failed', 'failed_generation': json.dumps({'action': 'stock'})}}).encode()
+        opener.return_value.open.side_effect = HTTPError('https://api.groq.com', 400, 'invalid structured result', {}, io.BytesIO(body))
+        result = self.send('Check my stock')
+        self.assertEqual(result['answer']['mode'], 'provider')
+        self.assertIsNone(result['proposal'])
+        self.assertFalse(Sale.objects.exists())
+
+    @patch('core.cloud_inference.build_opener')
+    def test_partial_provider_intent_cannot_add_unrecognized_fields(self, opener):
+        body = json.dumps({'error': {'code': 'json_validate_failed', 'failed_generation': json.dumps({'action': 'stock', 'sql': 'untrusted'})}}).encode()
+        opener.return_value.open.side_effect = HTTPError('https://api.groq.com', 400, 'invalid structured result', {}, io.BytesIO(body))
+        result = self.send('Check my stock')
+        self.assertEqual(result['answer']['mode'], 'provider_unavailable')
+        self.assertFalse(Sale.objects.exists())
+
     @patch("core.cloud_inference.request_json")
     def test_cloud_speech_preserves_pcm_and_does_not_record_transactions(self, request):
         request.return_value = {"text": "Sell two waters"}

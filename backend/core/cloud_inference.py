@@ -16,6 +16,12 @@ class CloudUnavailable(Exception):
     pass
 
 
+class StructuredResultRejected(CloudUnavailable):
+    def __init__(self, generated):
+        super().__init__('The model returned an invalid structured response. Try rephrasing the request.')
+        self.generated = generated
+
+
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs): return None
 
@@ -54,6 +60,13 @@ def request_json(path, body, content_type="application/json"):
         if len(raw) > 65536: raise ValueError()
         return json.loads(raw)
     except HTTPError as error:
+        if error.code == 400:
+            try:
+                detail = json.loads(error.read(65537)).get('error', {})
+                if detail.get('code') == 'json_validate_failed' and isinstance(detail.get('failed_generation'), str):
+                    raise StructuredResultRejected(detail['failed_generation'])
+            except (ValueError, TypeError):
+                pass
         if error.code == 429:
             raise CloudUnavailable("Groq's free quota or rate limit has been reached. Wait and retry; no paid fallback is enabled.") from None
         if error.code in (400, 404):
@@ -73,7 +86,19 @@ def intent(payload, schema):
     if len(body) > 24000:
         raise CloudUnavailable("This conversation request is too large. Start a new conversation or shorten the message.")
     reserve("chat")
-    result = request_json("chat/completions", body)
+    try:
+        result = request_json("chat/completions", body)
+    except StructuredResultRejected as error:
+        from jsonschema import validate, ValidationError
+        try:
+            generated = json.loads(error.generated)
+            if 'action' in schema.get('properties', {}):
+                if not isinstance(generated, dict) or not generated.get('action'): raise ValueError()
+                generated = {**{key: '' for key in schema['properties'] if key != 'action'}, **generated}
+            validate(generated, schema)
+            return json.dumps(generated)
+        except (ValueError, TypeError, ValidationError):
+            raise CloudUnavailable('The model response could not be validated. Try rephrasing your request.') from None
     choice = result["choices"][0]
     if choice["finish_reason"] != "stop" or choice["message"].get("refusal"):
         raise CloudUnavailable("Cloud AI did not return a complete intent. Try rephrasing your request.")
