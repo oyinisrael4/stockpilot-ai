@@ -29,7 +29,7 @@ npm.cmd run build:showcase
 npm.cmd run preview:showcase
 ```
 
-Open http://127.0.0.1:5198/ and choose **Explore interactive demo**. Deployable output is **frontend/dist-showcase only**. The source repository is public; the public demonstration URL will be added after Cloudflare deployment and verification. See [publication and zero-cost hosting instructions](docs/PUBLIC_SHOWCASE.md); Cloudflare Pages Free is the approved static target. Never upload the workspace folder, root `.env`, `.local`, model weights or backups.
+Open http://127.0.0.1:5198/ and choose **Explore interactive demo**. Deployable output is **frontend/dist-showcase only**. The static resource is also available at https://stockpilot-ai-p89q.onrender.com/showcase/. See [static hosting instructions](docs/PUBLIC_SHOWCASE.md) for the optional independent build; the primary deployment is the complete Render application. Never upload the workspace folder, root `.env`, `.local`, model weights or backups.
 
 ![Public showcase desktop](docs/screenshots/phase8-showcase-1440.png)
 
