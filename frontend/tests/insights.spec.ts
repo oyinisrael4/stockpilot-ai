@@ -9,8 +9,9 @@ test('insights prioritize real stock and compare recorded financial activity on 
   await page.getByLabel('Business name').fill('Harbor Water Supply')
   await page.getByLabel('Username').fill(user)
   await page.getByLabel('Email').fill(user + '@example.invalid')
-  await page.getByLabel('Password').fill('Fixture!Wavelength459')
-  await page.getByRole('button', { name: 'Create workspace' }).click()
+  await page.getByLabel('Password', { exact: true }).fill('Fixture!Wavelength459')
+  if (await page.getByLabel('Confirm Password', { exact: true }).count()) await page.getByLabel('Confirm Password', { exact: true }).fill('Fixture!Wavelength459')
+await page.getByRole('button', { name: 'Create workspace' }).click()
   await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
 
   const [business] = await (await page.request.get('/api/v1/businesses/')).json()

@@ -9,8 +9,9 @@ test('assistant reads database figures and posts only the explicitly confirmed p
   await page.getByLabel('Business name').fill('Harbor Water Supply · Assistant Test')
   await page.getByLabel('Username').fill(username)
   await page.getByLabel('Email').fill(username + '@example.invalid')
-  await page.getByLabel('Password').fill('Fixture!Wavelength459')
-  await page.getByRole('button', { name: 'Create workspace' }).click()
+  await page.getByLabel('Password', { exact: true }).fill('Fixture!Wavelength459')
+  if (await page.getByLabel('Confirm Password', { exact: true }).count()) await page.getByLabel('Confirm Password', { exact: true }).fill('Fixture!Wavelength459')
+await page.getByRole('button', { name: 'Create workspace' }).click()
   await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
 
   const [business] = await (await page.request.get('/api/v1/businesses/')).json()
@@ -144,8 +145,9 @@ test('voice permission fallback preserves typed text and sends nothing', async (
   await page.getByLabel('Business name').fill('Voice Permission Test')
   await page.getByLabel('Username').fill(username)
   await page.getByLabel('Email').fill(username + '@example.invalid')
-  await page.getByLabel('Password').fill('Fixture!Wavelength459')
-  await page.getByRole('button', { name: 'Create workspace' }).click()
+  await page.getByLabel('Password', { exact: true }).fill('Fixture!Wavelength459')
+  if (await page.getByLabel('Confirm Password', { exact: true }).count()) await page.getByLabel('Confirm Password', { exact: true }).fill('Fixture!Wavelength459')
+await page.getByRole('button', { name: 'Create workspace' }).click()
   await page.getByRole('link', { name: 'Ask StockPilot AI' }).click()
 
   const cdp = await context.newCDPSession(page)

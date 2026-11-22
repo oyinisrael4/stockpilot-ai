@@ -40,7 +40,7 @@ export function Landing({ signedIn, showcase = false, demoUrl }: { signedIn: boo
           <p>Inventory, checkout and intelligence in one workspace. See what moved, what earned a profit, and where to act next.</p>
           <div className="actions">
             {showcase ? <Link className="primary" to="/demo">Explore interactive demo <ArrowRight size={17} /></Link> : <a className="primary" href={demo || '#workflows'}>{demo ? 'Explore live demo' : 'Explore product'} <ArrowRight size={17} /></a>}
-            {showcase ? <a className="secondary" href="#capabilities" onClick={scrollSection}>See the capabilities</a> : <Link className="secondary" to={signedIn ? '/app' : '/register'}>{signedIn ? 'Open workspace' : 'Create a workspace'}</Link>}
+            {showcase ? <a className="secondary" href="#capabilities" onClick={scrollSection}>See the capabilities</a> : <Link className="secondary" to={signedIn ? '/app' : demoUrl ? '/login' : '/register'}>{signedIn ? 'Open workspace' : demoUrl ? 'Try fictional demo' : 'Create a workspace'}</Link>}
           </div>
         </div>
         <StockSculpture />

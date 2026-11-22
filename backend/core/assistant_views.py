@@ -288,6 +288,8 @@ class Conversations(TenantMixin, mixins.ListModelMixin, mixins.CreateModelMixin,
                 and re.match(r"^(?:of\s+)?(?:that|this|same)\b", intent.get("entity", ""), re.I)):
             if prior_intent.get("entity"):
                 intent = {**intent, "entity": prior_intent["entity"]}
+        if intent["action"] == "analysis" and settings.ASSISTANT_PROVIDER != "groq":
+            intent = {**intent, "action": "insights"}
         proposal = None
         if not Membership.objects.filter(business=self.business, user=self.request.user).exists():
             raise PermissionDenied("Your workspace access has changed.")
@@ -302,10 +304,18 @@ class Conversations(TenantMixin, mixins.ListModelMixin, mixins.CreateModelMixin,
                     answer = response("Review this preview. Confirm when the details match the transaction you want to record.")
                     if preview.get("sku"):
                         intent = {**intent, "entity": preview["sku"]}
+            elif intent["action"] in ("analysis", "insights", "unsupported") and settings.ASSISTANT_PROVIDER == "groq":
+                from .business_conversation import answer_question
+                intent = {**intent, "action": "analysis"}
+                answer = answer_question(self.business, prompt, intent, recent)
+                answer["report_intent"] = intent
             else:
                 answer = run_read_tool(self.business, intent)
                 if (answer.get("card") or intent["action"] == "insights") and intent["action"] in PERIOD_READ_ACTIONS:
                     answer["report_intent"] = intent
+        except ProviderUnavailable as error:
+            answer = {**response(str(error)), "mode": "provider_unavailable"}
+            mode = "provider_unavailable"
         except ValidationError as error:
             answer = response(validation_text(error.detail))
         if answer.get("followup"):

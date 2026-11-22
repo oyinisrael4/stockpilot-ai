@@ -22,6 +22,7 @@ class LoginInput(s.Serializer):
 
 
 class RegisterInput(LoginInput):
+    confirm_password = s.CharField(write_only=True, max_length=256, trim_whitespace=False)
     username = s.CharField(max_length=150, validators=[User._meta.get_field("username").validators[0]])
     email = s.EmailField(max_length=254)
     business_name = s.CharField(max_length=120)
@@ -33,6 +34,8 @@ class RegisterInput(LoginInput):
         return value.lower()
 
     def validate(self, attrs):
+        if attrs["password"] != attrs.pop("confirm_password"):
+            raise s.ValidationError({"confirm_password": "Passwords do not match"})
         check_password(attrs["password"], User(username=attrs["username"], email=attrs["email"]))
         return attrs
 

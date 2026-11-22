@@ -268,3 +268,9 @@ Read the [security, reliability and performance report](docs/PHASE7_READINESS_RE
 Install optional production WSGI support with `pip install -r backend/requirements-production.txt`. With a private production environment configured, run `backend/manage.py migrate`, `backend/manage.py createcachetable`, and `backend/manage.py check --deploy` using the virtual environment Python, then start `scripts/serve_production.py` behind the reviewed HTTPS proxy. The example proxy configuration is in `deploy/nginx.conf.example`.
 
 Security checks can be repeated with `scripts/check_secret_leaks.py`, pip-audit and npm audit. `scripts/database_recovery.py` creates a new backup or restores only into a new isolated database. `benchmark_workspace` refuses any database except `stockpilot_perf`; it creates a fictional 10,000-product/3,000-sale fixture there. `scripts/benchmark_ai.py` measures the installed local provider and a spoken WAV without posting business records. Performance measurements and operating limitations are recorded in the Phase 7 report.
+
+## Phase 9 refinement
+
+Public commercial registration remains closed. The registration page explains the portfolio status and directs visitors to the fictional demo. Local development retains registration, with required password confirmation and accessible show/hide controls.
+
+Groq can interpret open-ended business discussions and generate read-only explanations from scoped backend insights. Findings cite supporting records, suggestions remain distinct from facts, and uncited numeric claims are rejected. Transactions still require explicit preview confirmation. Live Phase 9 verification is pending; see docs/PHASE9_VERIFICATION.md for the actual gate results.

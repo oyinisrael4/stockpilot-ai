@@ -41,14 +41,14 @@ export function Dialog({ title, close, children }: { title: string; close: () =>
   </dialog>
 }
 
-export function Form({ children, submit, label, danger = false }: {
-  children?: ReactNode; submit: (form: FormData) => Promise<void>; label: string; danger?: boolean
+export function Form({ children, submit, label, danger = false, disabled = false }: {
+  children?: ReactNode; submit: (form: FormData) => Promise<void>; label: string; danger?: boolean; disabled?: boolean
 }) {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
   async function handle(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (pending) return
+    if (pending || disabled) return
     setError('')
     setPending(true)
     try { await submit(new FormData(event.currentTarget)) }
@@ -58,6 +58,6 @@ export function Form({ children, submit, label, danger = false }: {
   return <form onSubmit={handle} className="form">
     <fieldset disabled={pending}>{children}</fieldset>
     {error && <div className="notice error" role="alert">{error}</div>}
-    <button className={danger ? 'danger' : 'primary'} disabled={pending}>{pending ? 'Working…' : label}</button>
+    <button className={danger ? 'danger' : 'primary'} disabled={pending || disabled}>{pending ? 'Working…' : label}</button>
   </form>
 }

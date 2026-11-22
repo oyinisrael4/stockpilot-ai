@@ -8,8 +8,9 @@ test('checkout, receive a split payment, report exact profit, and process a retu
   await page.getByLabel('Business name').fill('Harbor Water Supply · Test Workspace')
   await page.getByLabel('Username').fill(username)
   await page.getByLabel('Email').fill(`${username}@example.invalid`)
-  await page.getByLabel('Password').fill('Fixture!Wavelength459')
-  await page.getByRole('button', { name: 'Create workspace' }).click()
+  await page.getByLabel('Password', { exact: true }).fill('Fixture!Wavelength459')
+  if (await page.getByLabel('Confirm Password', { exact: true }).count()) await page.getByLabel('Confirm Password', { exact: true }).fill('Fixture!Wavelength459')
+await page.getByRole('button', { name: 'Create workspace' }).click()
   await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
 
   const workspaceResponse = await page.request.get('/api/v1/businesses/')

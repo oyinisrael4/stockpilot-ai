@@ -16,7 +16,7 @@ API = "/api/v1/"
 class AccountTests(APITestCase):
     def test_registration_csrf_session_and_logout(self):
         client = APIClient(enforce_csrf_checks=True)
-        payload = {"username": "TestOwner", "email": "owner@example.invalid", "password": PASSWORD, "business_name": "Test workspace"}
+        payload = {"username": "TestOwner", "email": "owner@example.invalid", "password": PASSWORD, "confirm_password": PASSWORD, "business_name": "Test workspace"}
         self.assertEqual(client.post(API + "auth/register/", payload).status_code, 403)
         session = client.get(API + "auth/session/")
         token = session.cookies["csrftoken"].value

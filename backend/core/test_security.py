@@ -58,7 +58,7 @@ class SecurityTests(APITestCase):
         self.assertEqual(self.client.generic("POST", "/api/v1/auth/login/", b"{}", content_type="application/json; charset=zlib_codec").status_code, 415)
         self.assertEqual(self.client.get(self.base + "products/", {"search": "x" * 201}).status_code, 400)
         self.assertEqual(self.client.get(self.base + "products/?search=" + "x" * 4100).status_code, 414)
-        self.assertEqual(client.post("/api/v1/auth/login/", {"username": "security-owner", "password": "Fixture!Wavelength459"}).status_code, 403)
+        self.assertEqual(client.post("/api/v1/auth/login/", {"username": "security-owner", "password": "Fixture!Wavelength459", "confirm_password": "Fixture!Wavelength459"}).status_code, 403)
         result = self.client.generic("POST", self.base + "assistant/transcribe/", b"x" * (2 * 1024 * 1024 + 1),
                                      content_type="audio/wav")
         self.assertEqual(result.status_code, 413)
@@ -69,7 +69,7 @@ class SecurityTests(APITestCase):
         self.assertEqual(self.client.post("/api/v1/auth/register/", {}, format="json").status_code, 403)
         self.client.force_authenticate(None)
         self.assertEqual(self.client.post("/api/v1/auth/login/", {"username": self.owner.username,
-                           "password": "Fixture!Wavelength459"}, format="json").status_code, 200)
+                           "password": "Fixture!Wavelength459", "confirm_password": "Fixture!Wavelength459"}, format="json").status_code, 200)
 
     @patch("core.views.send_mail", side_effect=OSError("private transport detail"))
     def test_reset_delivery_failure_has_generic_response_and_safe_log(self, send):
@@ -89,7 +89,7 @@ class SecurityTests(APITestCase):
     def test_authentication_throttle_is_per_ip_even_after_login(self):
         self.client.force_authenticate(None)
         for _ in range(12):
-            result = self.client.post("/api/v1/auth/login/", {"username": "nobody", "password": "incorrect"}, format="json", HTTP_X_FORWARDED_FOR=f"198.51.100.{_}")
+            result = self.client.post("/api/v1/auth/login/", {"username": "nobody", "password": "incorrect", "confirm_password": "incorrect"}, format="json", HTTP_X_FORWARDED_FOR=f"198.51.100.{_}")
             self.assertEqual(result.status_code, 400)
         self.assertEqual(self.client.post("/api/v1/auth/login/", {}, format="json").status_code, 429)
 

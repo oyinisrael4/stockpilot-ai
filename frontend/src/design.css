@@ -239,3 +239,7 @@ td { overflow-wrap:normal; }
 .preview-frame img { max-height:810px; object-fit:cover; object-position:top; }
 .insight-metrics > article { container-type:inline-size; }
 .insight-metrics strong { font-size:clamp(1rem,12cqi,1.7rem); }
+
+.password-control { display:flex; align-items:center; gap:.4rem; }
+.password-control input { flex:1; min-width:0; }
+.password-control .icon-btn { flex:none; }

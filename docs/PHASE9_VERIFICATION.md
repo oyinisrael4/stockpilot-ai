@@ -1,0 +1,13 @@
+# Phase 9 verification
+
+Status: implemented and locally verified; public conversation validation is pending deployment. Do not treat this document as a completion declaration until the live gate is recorded.
+
+Public registration remains disabled. No real-customer onboarding was enabled. The closed-registration page explains the portfolio status and links to the shared fictional demo. Local development preserves registration with required backend/frontend password confirmation, visibility controls and password rules.
+
+The previous assistant selected a bounded intent and rendered fixed backend responses; connecting Groq did not give it a response-generation stage. Groq now has an open-ended analysis intent and a read-only explanation stage over workspace-scoped, deterministic insights. The explanation receives bounded prior questions and answers, selected periods, comparisons and record evidence. Findings require source references. Numbers in prose must be copied from cited server records; unsupported numeric claims fail validation. Suggestions and limitations are labelled separately. No generated explanation has a write path. Existing preview, role, confirmation and idempotency services remain authoritative.
+
+Local checks: 77 backend tests discovered, 74 passed and three optional live/local-model checks skipped. All ten browser tests passed against built React served by Django, including registration validity, confirmation, show/hide controls, closed-registration messaging, inventory, POS, reporting, assistant confirmations, microphone fallback and keyboard/mobile regression journeys. Production build and API schema validation passed. The publication audit found no matching secrets. One real Groq explanation using local fictional workspace records passed; it is not a substitute for live public-host conversations.
+
+The free demo uses shared API allowances. Analysis currently requires a planning request and an explanation request; the default two requests/minute means full analytical turns should be paced. Provider quota and connectivity errors remain explicit; no paid fallback or automatic model upgrade is enabled. Local Ollama continues to use the existing deterministic insight rendering for analysis intents. Offline Whisper is unchanged.
+
+Remaining gate: deploy to the existing Free Render service, test the requested natural conversations and unseen questions on the public host, check follow-ups and failures, verify production registration stays closed, and record outcomes here. Shared fictional verification conversations are retained; no private real-business records are used.

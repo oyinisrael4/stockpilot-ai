@@ -53,7 +53,7 @@ class Session(APIView):
     @extend_schema(responses={200: dict})
     def get(self, request):
         return Response({"user": s.Profile(request.user).data if request.user.is_authenticated else None,
-                         "public_demo": os.getenv("STOCKPILOT_PUBLIC_DEMO") == "1"})
+                         "public_demo": os.getenv("STOCKPILOT_PUBLIC_DEMO") == "1", "registration_enabled": settings.ALLOW_REGISTRATION})
 
 
 class AccountIPThrottle(SimpleRateThrottle):
